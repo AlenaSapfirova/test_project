@@ -45,9 +45,11 @@ class CheckOtpCodeSerializer(serializers.Serializer):
     def validate(self, data):
         token = data.get('token', None)
         user_token = Token.objects.filter(token=token).first()
-        time_live = user_token.created_at + user_token.expire
-        if datetime.now(timezone.utc) <= time_live:
-            return data
+        if user_token:
+            time_live = user_token.created_at + user_token.expire
+            if datetime.now(timezone.utc) <= time_live:
+                return data
+            raise ValidationError('the token was transferred incorrectly or expired')
         raise ValidationError('the token was transferred incorrectly or expired')
 
 
